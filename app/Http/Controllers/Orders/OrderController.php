@@ -98,11 +98,15 @@ class OrderController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
-    public function show($id)
+    public function show($id):JsonResponse
     {
-        //
+        $order = $this->orderRepository->show($id);
+        if (!$order) {
+            return response()->json(["res" => false, "message" => "El registro no existe"], 404);
+        }
+        return response()->json(["res" => true, "message" => "ok", "data" => $order], 200);
     }
 
     /**

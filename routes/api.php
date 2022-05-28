@@ -21,4 +21,5 @@ use Illuminate\Support\Facades\Route;
 
 Route::controller(OrderController::class)->group(function () {
     Route::post('order-create', 'store');
+    Route::get('order-show/{id}', 'show');
 });
