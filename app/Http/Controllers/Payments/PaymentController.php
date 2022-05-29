@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Payments;
 
 use App\Http\Controllers\Controller;
+use App\Http\Repositories\Orders\OrderRepository;
 use App\Models\Order;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -10,6 +11,7 @@ use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {
+
     public function generateLinkPay(Order $order)
     {
 
@@ -21,7 +23,12 @@ class PaymentController extends Controller
 
             $tranKey = base64_encode(sha1($order->uuid . $seed . $key, true));
             $client = new Client();
-
+            /* return [
+                "login" => $_ENV["LOGIN_PAYMENT"],
+                "seed" => $seed,
+                "nonce" => $once,
+                "tranKey" => $tranKey
+            ]; */
             $response = $client->post(
                 'https://dev.placetopay.com/redirection/api/session',
                 ['json' => [
@@ -34,7 +41,7 @@ class PaymentController extends Controller
                     ],
                     "payment" => [
                         "reference" => $order->id,
-                        "description" => "Prueba",
+                        "description" => "Pedido N- " . $order->id,
                         "amount" => [
                             "currency" => "COP",
                             "total" => $order->total,
@@ -49,6 +56,10 @@ class PaymentController extends Controller
             );
 
             $response = json_decode($response->getBody(), true);
+
+            $order->payment_id = $response["requestId"];
+            $order->update();
+
             return $response['processUrl']; //access key
 
         } catch (\Throwable $th) {
