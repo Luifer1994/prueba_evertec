@@ -37,7 +37,8 @@ class Order extends Model
         'uuid',
         'client_id',
         'total',
-        'status'
+        'status',
+        'payment_id'
     ];
 
     public function client()
