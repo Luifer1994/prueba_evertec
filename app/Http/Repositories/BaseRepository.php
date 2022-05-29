@@ -29,4 +29,13 @@ class BaseRepository
         }
         return $query->find($id);
     }
+
+    public function index(int $limit)
+    {
+        $query = $this->model;
+        if (!empty($this->relationships)) {
+            $query =   $query->with($this->relationships);
+        }
+        return $query->paginate($limit);
+    }
 }

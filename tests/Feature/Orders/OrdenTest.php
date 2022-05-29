@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Orders;
 
 use App\Models\Client;
 use App\Models\Order;
