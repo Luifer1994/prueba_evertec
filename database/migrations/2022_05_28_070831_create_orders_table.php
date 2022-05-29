@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->string('uuid');
             $table->foreignId('client_id')->constrained('clients');
             $table->float('total', 20, 2);
             $table->enum('status', ['CREATED', 'PAYED', 'REJECTED'])->default('CREATED');
