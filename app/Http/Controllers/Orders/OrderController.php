@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Orders;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Repositories\Orders\OrderRepository;
 use App\Http\Repositories\Clients\ClientRepository;
 use App\Http\Repositories\Orders\OrderLineRepository;
@@ -47,7 +48,7 @@ class OrderController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(CreateOrderRequest $request): JsonResponse
+    public function store(CreateOrderRequest $request) //: JsonResponse
     {
 
         DB::beginTransaction();
@@ -87,6 +88,10 @@ class OrderController extends Controller
             }
 
             DB::commit();
+            $paymentController = new PaymentController;
+            $payment = $paymentController->generateLinkPay($newOrder);
+            $newOrder["url_payment"] = $payment;
+
             return response()->json(["res" => true, "message" => "Orden creada con éxito", "data" => $newOrder], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -100,7 +105,7 @@ class OrderController extends Controller
      * @param  int  $id
      * @return JsonResponse
      */
-    public function show($id):JsonResponse
+    public function show($id): JsonResponse
     {
         $order = $this->orderRepository->show($id);
         if (!$order) {
