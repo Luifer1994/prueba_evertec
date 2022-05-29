@@ -15,6 +15,7 @@ use App\Models\OrderLine;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
@@ -65,7 +66,7 @@ class OrderController extends Controller
             }
 
             $request["total"] = 0;
-
+            $request["uuid"] = Str::uuid();
             foreach ($request->products as $product) {
 
                 $getProduct         = $this->productRepository->show($product["id"]);

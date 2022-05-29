@@ -16,11 +16,10 @@ class PaymentController extends Controller
         try {
 
             $seed =  date('c');
-            $random = Str::random(10);
-            $once = base64_encode($random);
+            $once = base64_encode($order->uuid);
             $key = $_ENV["KEY_PAYMENT"];
 
-            $tranKey = base64_encode(sha1($random . $seed . $key, true));
+            $tranKey = base64_encode(sha1($order->uuid . $seed . $key, true));
             $client = new Client();
 
             $response = $client->post(
