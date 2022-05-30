@@ -15,7 +15,6 @@ use App\Models\OrderLine;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class OrderController extends Controller
@@ -26,22 +25,34 @@ class OrderController extends Controller
     private $productRepository;
     private $orderLineRepository;
 
+    /**
+     * Injet repository in mounte class.
+     *
+     */
     public function __construct(OrderRepository $orderRepository, ClientRepository $clientRepository, ProductRepository $productRepository, OrderLineRepository $orderLineRepository)
     {
-        $this->orderRepository = $orderRepository;
-        $this->clientRepository = $clientRepository;
-        $this->productRepository = $productRepository;
-        $this->orderLineRepository = $orderLineRepository;
+        $this->orderRepository      = $orderRepository;
+        $this->clientRepository     = $clientRepository;
+        $this->productRepository    = $productRepository;
+        $this->orderLineRepository  = $orderLineRepository;
     }
 
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     *@param Request $request
+     * @return JsonResponse
      */
-    public function index()
+    public function index(Request $request): JsonResponse
     {
-        //
+        try {
+
+            $limit = $request["limit"] ?? 10;
+            $orders = $this->orderRepository->index($limit);
+
+            return response()->json(["res" => true, "message" => "Ok", "data" => $orders], 200);
+        } catch (\Throwable $th) {
+            return response()->json(["res" => false, "message" => $th->getMessage()], 400);
+        }
     }
 
     /**
@@ -50,7 +61,7 @@ class OrderController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(CreateOrderRequest $request) //: JsonResponse
+    public function store(CreateOrderRequest $request): JsonResponse
     {
 
         DB::beginTransaction();
@@ -102,9 +113,9 @@ class OrderController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Detail order and change status.
      *
-     * @param  int  $id
+     * @param  int  $uuid
      * @return JsonResponse
      */
     public function show($uuid): JsonResponse
@@ -128,16 +139,21 @@ class OrderController extends Controller
      * reintent payment.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  int  $uuid
+     * @return JsonResponse
      */
-    public function retryPayment($uuid)
+    public function retryPayment($uuid): JsonResponse
     {
-        $order = $this->orderRepository->getUuid($uuid);
-        $paymentController = new PaymentController;
-        $payment = $paymentController->generateLinkPay($order);
-        $order["url_payment"] = $payment;
+        try {
 
-        return response()->json(["res" => true, "message" => "Orden creada con éxito", "data" => $order], 200);
+            $order                  = $this->orderRepository->getUuid($uuid);
+            $paymentController      = new PaymentController;
+            $payment                = $paymentController->generateLinkPay($order);
+            $order["url_payment"]   = $payment;
+
+            return response()->json(["res" => true, "message" => "Orden creada con éxito", "data" => $order], 200);
+        } catch (\Throwable $th) {
+            return response()->json(["res" => false, "message" => $th->getMessage()], 400);
+        }
     }
 }

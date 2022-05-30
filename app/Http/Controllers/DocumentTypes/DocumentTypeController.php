@@ -4,21 +4,35 @@ namespace App\Http\Controllers\DocumentTypes;
 
 use App\Http\Controllers\Controller;
 use App\Http\Repositories\DocumentTypes\DocumentTypeRepository;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class DocumentTypeController extends Controller
 {
+
     private $documentTypeRepository;
 
+    /**
+     * Injet repository in mounte class.
+     *
+     */
     public function __construct(DocumentTypeRepository $documentTypeRepository)
     {
         $this->documentTypeRepository = $documentTypeRepository;
     }
 
-    public function index()
+    /**
+     * Display a listing of the resource.
+     *
+     * @return JsonResponse
+     */
+    public function index(): JsonResponse
     {
-        $documentTypes = $this->documentTypeRepository->index(20);
+        try {
 
-        return response()->json(['res' => true, 'data' => $documentTypes], 200);
+            $documentTypes = $this->documentTypeRepository->index(20);
+            return response()->json(['res' => true, 'data' => $documentTypes], 200);
+        } catch (\Throwable $th) {
+            return response()->json(["res" => false, "message" => $th->getMessage()], 400);
+        }
     }
 }
