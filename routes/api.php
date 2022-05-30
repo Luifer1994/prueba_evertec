@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Clients\ClientController;
+use App\Http\Controllers\DocumentTypes\DocumentTypeController;
 use App\Http\Controllers\Orders\OrderController;
 use App\Http\Controllers\Products\ProductController;
 use Illuminate\Support\Facades\Route;
@@ -22,9 +24,20 @@ use Illuminate\Support\Facades\Route;
 
 Route::controller(OrderController::class)->group(function () {
     Route::post('order-create', 'store');
-    Route::get('order-show/{id}', 'show');
+    Route::get('order-show/{uuid}', 'show');
+    Route::get('order-retry-payment/{uuid}', 'retryPayment');
 });
 
 Route::controller(ProductController::class)->group(function () {
     Route::get('products-list', 'index');
+    Route::get('products-detail/{id}', 'show');
+});
+
+Route::controller(ClientController::class)->group(function () {
+    Route::get('client-by-email', 'findEmail');
+    Route::get('client-get-orders', 'getOrders');
+});
+
+Route::controller(DocumentTypeController::class)->group(function () {
+    Route::get('document-type-list', 'index');
 });

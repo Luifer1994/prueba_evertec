@@ -8,7 +8,7 @@ use App\Models\Order;
 class OrderRepository extends BaseRepository
 {
 
-    const RELATIONSHIP = ['client.document_type','order_lines.product'];
+    const RELATIONSHIP = ['client.document_type', 'order_lines.product'];
 
 
     function __construct(Order $order)
@@ -23,5 +23,14 @@ class OrderRepository extends BaseRepository
             ->withCount('tracings')
             ->orderBy('findings.id', 'DESC')
             ->paginate($limit);
+    }
+
+    public function getUuid(string $uuid)
+    {
+        $query = $this->model;
+        if (!empty($this->relationships)) {
+            $query =   $query->with($this->relationships);
+        }
+        return $query->where('uuid', $uuid)->first();
     }
 }
