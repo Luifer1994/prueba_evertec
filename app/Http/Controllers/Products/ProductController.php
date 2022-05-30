@@ -26,4 +26,13 @@ class ProductController extends Controller
             return response()->json(["res" => false, "message" => $th->getMessage()], 400);
         }
     }
+
+    public function show($id): JsonResponse
+    {
+        $product = $this->productRepository->show($id);
+        if (!$product) {
+            return response()->json(["res" => false, "message" => "El registro no existe"], 404);
+        }
+        return response()->json(["res" => true, "message" => "ok", "data" => $product], 200);
+    }
 }

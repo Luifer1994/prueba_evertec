@@ -15,6 +15,7 @@ use App\Models\OrderLine;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class OrderController extends Controller
@@ -106,35 +107,37 @@ class OrderController extends Controller
      * @param  int  $id
      * @return JsonResponse
      */
-    public function show($id): JsonResponse
+    public function show($uuid): JsonResponse
     {
-        $order = $this->orderRepository->show($id);
-        if (!$order) {
-            return response()->json(["res" => false, "message" => "El registro no existe"], 404);
+        try {
+
+            $order = $this->orderRepository->getUuid($uuid);
+            if (!$order) {
+                return response()->json(["res" => false, "message" => "El registro no existe"], 404);
+            }
+            $paymentController = new PaymentController;
+            $order =   $paymentController->getStatusOrder($order);
+
+            return response()->json(["res" => true, "message" => "ok", "data" => $order], 200);
+        } catch (\Throwable $th) {
+            return response()->json(["res" => false, "message" => $th->getMessage()], 400);
         }
-        return response()->json(["res" => true, "message" => "ok", "data" => $order], 200);
     }
 
     /**
-     * Update the specified resource in storage.
+     * reintent payment.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function retryPayment($uuid)
     {
-        //
-    }
+        $order = $this->orderRepository->getUuid($uuid);
+        $paymentController = new PaymentController;
+        $payment = $paymentController->generateLinkPay($order);
+        $order["url_payment"] = $payment;
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        return response()->json(["res" => true, "message" => "Orden creada con éxito", "data" => $order], 200);
     }
 }

@@ -16,11 +16,11 @@ return new class extends Migration
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
             $table->foreignId('document_type_id')->constrained('document_types');
-            $table->string('document_number',45);
-            $table->string('name',75);
-            $table->string('last_name',75);
-            $table->string('email',75);
-            $table->string('phone',20);
+            $table->string('document_number', 45);
+            $table->string('name', 75);
+            $table->string('last_name', 75);
+            $table->string('email', 75)->unique();
+            $table->string('phone', 20);
             $table->timestamps();
         });
     }

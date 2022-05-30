@@ -16,4 +16,10 @@ class ClientRepository extends BaseRepository
         parent::__construct($client, self::RELATIONSHIP);
     }
 
+
+    public function findByEmail(string $email)
+    {
+        return $this->model->whereEmail($email)->with('document_type')->first();
+    }
+
 }
