@@ -147,6 +147,9 @@ class OrderController extends Controller
         try {
 
             $order                  = $this->orderRepository->getUuid($uuid);
+            if (!$order) {
+                return response()->json(["res" => false, "message" => "El registro no existe"], 400);
+            }
             $paymentController      = new PaymentController;
             $payment                = $paymentController->generateLinkPay($order);
             $order["url_payment"]   = $payment;
