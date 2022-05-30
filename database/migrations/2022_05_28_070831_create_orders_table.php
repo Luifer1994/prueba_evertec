@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('uuid');
             $table->foreignId('client_id')->constrained('clients');
             $table->float('total', 20, 2);
-            $table->enum('status', ['CREATED', 'PAYED', 'REJECTED'])->default('CREATED');
+            $table->enum('status', ['CREATED', 'PAYED', 'REJECTED','PENDING'])->default('CREATED');
             $table->timestamps();
         });
     }

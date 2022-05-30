@@ -2,21 +2,22 @@
 
 namespace Tests\Feature\Products;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
+use App\Models\Product;
 use Tests\TestCase;
 
 class ProductsTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     *
-     * @return void
-     */
     public function test_product_list_success()
     {
         $response = $this->get('api/products-list');
 
+        $response->assertStatus(200);
+    }
+
+    public function test_product_detail()
+    {
+        $product = Product::first();
+        $response = $this->get('api/products-detail/' . $product->id);
         $response->assertStatus(200);
     }
 }

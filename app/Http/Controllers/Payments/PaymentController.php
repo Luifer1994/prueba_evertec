@@ -58,10 +58,9 @@ class PaymentController extends Controller
 
             $response = json_decode($response->getBody(), true);
 
-            if (!$order->payment_id) {
-                $order->payment_id = $response["requestId"];
-                $order->update();
-            }
+            $order->payment_id = $response["requestId"];
+            $order->update();
+
             return $response['processUrl']; //access key
 
         } catch (\Throwable $th) {
@@ -93,7 +92,8 @@ class PaymentController extends Controller
             );
 
             $response       = json_decode($response->getBody(), true);
-            return $response;
+
+            //return $response;
             $order->status = $this->returnStatus($response["status"]["status"]);
             $order->update();
             return $order;
@@ -112,16 +112,16 @@ class PaymentController extends Controller
                 return "PAYED";
                 break;
             case "APPROVED_PARTIAL";
-                return "CREATED";
+                return "PENDING";
                 break;
             case 'REJECTED';
                 return "REJECTED";
                 break;
             case 'PENDING';
-                return "CREATED";
+                return "PENDING";
                 break;
             case 'PENDING_VALIDATION';
-                return "CREATED";
+                return "PENDING";
                 break;
             case 'REFUNDED';
                 return "REJECTED";
