@@ -39,5 +39,5 @@ Route::controller(ClientController::class)->group(function () {
 
 //Document types
 Route::controller(DocumentTypeController::class)->group(function () {
-    Route::get('    ', 'index');
+    Route::get('document-type-list', 'index');
 });
