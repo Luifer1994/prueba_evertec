@@ -13,6 +13,11 @@ use Illuminate\Support\Str;
 class PaymentController extends Controller
 {
 
+    /**
+     * Gnerate link payment placetopay.
+     *@param objet type Order model
+     * @return Json
+     */
     public function generateLinkPay(Order $order)
     {
 
@@ -68,17 +73,23 @@ class PaymentController extends Controller
         }
     }
 
+    /**
+     * Consult status te payment.
+     *@param objet type Order model
+     * @return Json
+     */
     public function getStatusOrder(Order $order)
     {
 
         try {
 
-            $seed =  date('c');
-            $once = base64_encode($order->uuid);
-            $key = $_ENV["KEY_PAYMENT"];
+            $seed   =  date('c');
+            $once   = base64_encode($order->uuid);
+            $key    = $_ENV["KEY_PAYMENT"];
 
             $tranKey = base64_encode(sha1($order->uuid . $seed . $key, true));
-            $client = new Client();
+            $client  = new Client();
+
             $response = $client->post(
                 'https://dev.placetopay.com/redirection/api/session/' . $order->payment_id,
                 ['json' => [
@@ -92,16 +103,20 @@ class PaymentController extends Controller
             );
 
             $response       = json_decode($response->getBody(), true);
-
-            //return $response;
-            $order->status = $this->returnStatus($response["status"]["status"]);
+            $order->status  = $this->returnStatus($response["status"]["status"]);
             $order->update();
+
             return $order;
         } catch (\Throwable $th) {
             return $th->getMessage();
         }
     }
 
+    /**
+     * Return status.
+     *@param string
+     * @return string
+     */
     public function returnStatus(String $status)
     {
         switch ($status) {

@@ -11,11 +11,20 @@ class ProductController extends Controller
 {
     private $productRepository;
 
+    /**
+     * Injet repository in mounte class.
+     *
+     */
     public function __construct(ProductRepository $productRepository)
     {
         $this->productRepository = $productRepository;
     }
 
+    /**
+     * Display a listing of the resource.
+     *@param Request $request
+     * @return JsonResponse
+     */
     public function index(Request $request): JsonResponse
     {
         try {
@@ -27,6 +36,11 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Detail product.
+     *@param Int $id
+     * @return JsonResponse
+     */
     public function show($id): JsonResponse
     {
         $product = $this->productRepository->show($id);

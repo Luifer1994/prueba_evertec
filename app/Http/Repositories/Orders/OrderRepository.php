@@ -16,15 +16,6 @@ class OrderRepository extends BaseRepository
         parent::__construct($order, self::RELATIONSHIP);
     }
 
-    public function all(int $limit)
-    {
-        return $this->model::select('*')
-            ->with('user.employee', 'area', 'image_findings')
-            ->withCount('tracings')
-            ->orderBy('findings.id', 'DESC')
-            ->paginate($limit);
-    }
-
     public function getUuid(string $uuid)
     {
         $query = $this->model;

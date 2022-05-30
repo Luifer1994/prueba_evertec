@@ -10,14 +10,25 @@ use Illuminate\Support\Facades\Validator;
 
 class ClientController extends Controller
 {
+
     private $clientRepository;
 
+    /**
+     * Injet repository in mounte class.
+     *
+     */
     public function __construct(ClientRepository $clientRepository)
     {
         $this->clientRepository = $clientRepository;
     }
 
-    public function findEmail(Request $request)
+
+    /**
+     * Get client by email.
+     *@param $request type email address
+     * @return JsonResponse
+     */
+    public function findEmail(Request $request): JsonResponse
     {
         try {
             $rules = ["email" => "required|email"];
@@ -42,7 +53,7 @@ class ClientController extends Controller
      * @param  Request
      * @return JsonResponse
      */
-    public function getOrders(Request $request) : JsonResponse
+    public function getOrders(Request $request): JsonResponse
     {
         try {
             $rules = [
