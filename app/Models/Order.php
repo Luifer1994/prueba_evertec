@@ -26,26 +26,28 @@ class Order extends Model
 {
     use HasFactory;
 
-	protected $table = 'orders';
+    protected $table = 'orders';
 
-	protected $casts = [
-		'client_id' => 'int',
-		'total' => 'float'
-	];
+    protected $casts = [
+        'client_id' => 'int',
+        'total' => 'float'
+    ];
 
-	protected $fillable = [
-		'client_id',
-		'total',
-		'status'
-	];
+    protected $fillable = [
+        'uuid',
+        'client_id',
+        'total',
+        'status',
+        'payment_id'
+    ];
 
-	public function client()
-	{
-		return $this->belongsTo(Client::class);
-	}
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
 
-	public function order_lines()
-	{
-		return $this->hasMany(OrderLine::class);
-	}
+    public function order_lines()
+    {
+        return $this->hasMany(OrderLine::class);
+    }
 }

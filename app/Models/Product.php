@@ -26,21 +26,22 @@ class Product extends Model
 {
     use HasFactory;
 
-	protected $table = 'products';
+    protected $table = 'products';
 
-	protected $casts = [
-		'price' => 'float'
-	];
+    protected $casts = [
+        'price' => 'float'
+    ];
 
-	protected $fillable = [
-		'image',
-		'name',
-		'description',
-		'price'
-	];
+    protected $fillable = [
+        'uuid',
+        'image',
+        'name',
+        'description',
+        'price'
+    ];
 
-	public function order_lines()
-	{
-		return $this->hasMany(OrderLine::class);
-	}
+    public function order_lines()
+    {
+        return $this->hasMany(OrderLine::class);
+    }
 }

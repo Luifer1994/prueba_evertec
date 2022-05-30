@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Orders;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Repositories\Orders\OrderRepository;
 use App\Http\Repositories\Clients\ClientRepository;
 use App\Http\Repositories\Orders\OrderLineRepository;
@@ -14,6 +15,7 @@ use App\Models\OrderLine;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
@@ -23,22 +25,34 @@ class OrderController extends Controller
     private $productRepository;
     private $orderLineRepository;
 
+    /**
+     * Injet repository in mounte class.
+     *
+     */
     public function __construct(OrderRepository $orderRepository, ClientRepository $clientRepository, ProductRepository $productRepository, OrderLineRepository $orderLineRepository)
     {
-        $this->orderRepository = $orderRepository;
-        $this->clientRepository = $clientRepository;
-        $this->productRepository = $productRepository;
-        $this->orderLineRepository = $orderLineRepository;
+        $this->orderRepository      = $orderRepository;
+        $this->clientRepository     = $clientRepository;
+        $this->productRepository    = $productRepository;
+        $this->orderLineRepository  = $orderLineRepository;
     }
 
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     *@param Request $request
+     * @return JsonResponse
      */
-    public function index()
+    public function index(Request $request): JsonResponse
     {
-        //
+        try {
+
+            $limit = $request["limit"] ?? 10;
+            $orders = $this->orderRepository->index($limit);
+
+            return response()->json(["res" => true, "message" => "Ok", "data" => $orders], 200);
+        } catch (\Throwable $th) {
+            return response()->json(["res" => false, "message" => $th->getMessage()], 400);
+        }
     }
 
     /**
@@ -64,7 +78,7 @@ class OrderController extends Controller
             }
 
             $request["total"] = 0;
-
+            $request["uuid"] = Str::uuid();
             foreach ($request->products as $product) {
 
                 $getProduct         = $this->productRepository->show($product["id"]);
@@ -87,6 +101,10 @@ class OrderController extends Controller
             }
 
             DB::commit();
+            $paymentController = new PaymentController;
+            $payment = $paymentController->generateLinkPay($newOrder);
+            $newOrder["url_payment"] = $payment;
+
             return response()->json(["res" => true, "message" => "Orden creada con éxito", "data" => $newOrder], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -95,36 +113,50 @@ class OrderController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Detail order and change status.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  int  $uuid
+     * @return JsonResponse
      */
-    public function show($id)
+    public function show($uuid): JsonResponse
     {
-        //
+        try {
+
+            $order = $this->orderRepository->getUuid($uuid);
+            if (!$order) {
+                return response()->json(["res" => false, "message" => "El registro no existe"], 404);
+            }
+            $paymentController = new PaymentController;
+            $order =   $paymentController->getStatusOrder($order);
+
+            return response()->json(["res" => true, "message" => "ok", "data" => $order], 200);
+        } catch (\Throwable $th) {
+            return response()->json(["res" => false, "message" => $th->getMessage()], 400);
+        }
     }
 
     /**
-     * Update the specified resource in storage.
+     * reintent payment.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  int  $uuid
+     * @return JsonResponse
      */
-    public function update(Request $request, $id)
+    public function retryPayment($uuid): JsonResponse
     {
-        //
-    }
+        try {
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+            $order                  = $this->orderRepository->getUuid($uuid);
+            if (!$order) {
+                return response()->json(["res" => false, "message" => "El registro no existe"], 400);
+            }
+            $paymentController      = new PaymentController;
+            $payment                = $paymentController->generateLinkPay($order);
+            $order["url_payment"]   = $payment;
+
+            return response()->json(["res" => true, "message" => "Orden creada con éxito", "data" => $order], 200);
+        } catch (\Throwable $th) {
+            return response()->json(["res" => false, "message" => $th->getMessage()], 400);
+        }
     }
 }
